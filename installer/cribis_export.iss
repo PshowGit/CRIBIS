@@ -3,7 +3,7 @@
 ; Compilazione: ISCC.exe installer\cribis_export.iss   (opzionale: /DAppVersion=1.0.1)
 
 #ifndef AppVersion
-  #define AppVersion "1.0.0"
+  #define AppVersion "1.0.1"
 #endif
 #define AppName "CRIBIS Export"
 #define AppExe "cribis_export.exe"
