@@ -10,3 +10,4 @@ __pycache__/
 # Output di PyInstaller: l'eseguibile si distribuisce con le GitHub Releases
 build/
 dist/
+installer/Output/

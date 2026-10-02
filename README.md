@@ -4,7 +4,7 @@ Applicazione desktop per Windows che, partendo da un elenco di P.IVA / codici fi
 
 ## Download
 
-L'eseguibile si scarica dalla pagina **Releases** del repository GitHub (ultima versione → file `cribis_export.exe` sotto *Assets*). Non serve installare nulla: salvarlo in una cartella a piacere (es. `C:\CRIBIS`) e fare doppio clic. I file di configurazione, il log e il risultato vengono creati nella stessa cartella.
+Dalla pagina **Releases** del repository GitHub si scarica l'ultima versione: il file `CRIBIS_Export_Setup_<versione>.exe` è l'installer (consigliato), mentre `cribis_export.exe` è la versione portatile. Non serve installare nulla: salvarlo in una cartella a piacere (es. `C:\CRIBIS`) e fare doppio clic. I file di configurazione, il log e il risultato vengono creati nella stessa cartella.
 Alla prima apertura Windows SmartScreen potrebbe avvisare che l'app non è riconosciuta: cliccare *Ulteriori informazioni* → *Esegui comunque*.
 
 ## Uso (utente finale)
@@ -45,6 +45,17 @@ pip install -r requirements.txt
 python cribis_export.py          # avvio da sorgente
 pyinstaller cribis_export.spec   # genera dist\cribis_export.exe (senza console)
 ```
+
+### Installer (Inno Setup)
+
+Dopo aver creato l'exe, l'installer Windows si genera con [Inno Setup 6](https://jrsoftware.org/isinfo.php):
+
+```powershell
+& "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe" installer\cribis_export.iss
+# versione diversa: ... /DAppVersion=1.0.1 installer\cribis_export.iss
+```
+
+Il risultato è `installer\Output\CRIBIS_Export_Setup_<versione>.exe`. L'installazione è **per utente** (senza permessi di amministratore) in `%LOCALAPPDATA%\Programs\CRIBIS Export`, perché l'app scrive configurazione, log e risultati accanto all'eseguibile. Crea il collegamento nel menu Start (e sul desktop, a scelta) e la voce di disinstallazione, che rimuove anche `config.json` e il log ma lascia il file Excel dei risultati.
 
 L'eseguibile creato è autonomo. `build/`, `dist/`, `config.json` e i file generati sono esclusi da git. Per pubblicare una nuova versione:
 
