@@ -1,9 +1,9 @@
 ; Installer Inno Setup per CRIBIS Export.
 ; Prerequisito: l'exe deve essere già stato creato con PyInstaller (dist\cribis_export.exe).
-; Compilazione: ISCC.exe installer\cribis_export.iss   (opzionale: /DAppVersion=1.0.1)
+; Compilazione: ISCC.exe installer\cribis_export.iss   (opzionale: /DAppVersion=1.0.2)
 
 #ifndef AppVersion
-  #define AppVersion "1.0.1"
+  #define AppVersion "1.0.2"
 #endif
 #define AppName "CRIBIS Export"
 #define AppExe "cribis_export.exe"

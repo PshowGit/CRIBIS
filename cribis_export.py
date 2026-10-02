@@ -254,11 +254,9 @@ class Scraper:
         try:
             service = Service(ChromeDriverManager().install())
         except Exception as e:
-            local_driver = resolve_path(self.config["CHROME_DRIVER_PATH"])
-            if not os.path.exists(local_driver):
-                raise RuntimeError(f"impossibile scaricare ChromeDriver ({e}) e nessun driver locale trovato") from e
-            self.log("⚠️ Download di ChromeDriver non riuscito, uso il driver locale.")
-            service = Service(local_driver)
+            # Ripiego: Selenium Manager (incluso in Selenium) scarica il driver giusto per conto suo.
+            self.log(f"⚠️ Download di ChromeDriver non riuscito ({e}). Provo con Selenium Manager.")
+            service = Service()
 
         options = webdriver.ChromeOptions()
         if self.config["SHOW_BROWSER"]:
