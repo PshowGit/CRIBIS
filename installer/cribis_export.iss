@@ -3,7 +3,7 @@
 ; Compilazione: ISCC.exe installer\cribis_export.iss   (opzionale: /DAppVersion=1.0.2)
 
 #ifndef AppVersion
-  #define AppVersion "1.0.2"
+  #define AppVersion "1.0.3"
 #endif
 #define AppName "CRIBIS Export"
 #define AppExe "cribis_export.exe"
@@ -38,6 +38,10 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "..\dist\{#AppExe}"; DestDir: "{app}"; Flags: ignoreversion
+; File di esempio: onlyifdoesntexist evita di sovrascrivere le credenziali e i dati dell'utente negli aggiornamenti.
+; config.json parte vuoto (nessuna credenziale): l'utente le inserisce nell'app.
+Source: "esempio\config.template.json"; DestDir: "{app}"; DestName: "config.json"; Flags: onlyifdoesntexist
+Source: "esempio\dati.txt"; DestDir: "{app}"; Flags: onlyifdoesntexist
 
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\{#AppExe}"

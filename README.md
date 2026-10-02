@@ -55,7 +55,7 @@ Dopo aver creato l'exe, l'installer Windows si genera con [Inno Setup 6](https:/
 # versione diversa: ... /DAppVersion=1.0.1 installer\cribis_export.iss
 ```
 
-Il risultato è `installer\Output\CRIBIS_Export_Setup_<versione>.exe`. L'installazione è **per utente** (senza permessi di amministratore) in `%LOCALAPPDATA%\Programs\CRIBIS Export`, perché l'app scrive configurazione, log e risultati accanto all'eseguibile. Crea il collegamento nel menu Start (e sul desktop, a scelta) e la voce di disinstallazione, che rimuove anche `config.json` e il log ma lascia il file Excel dei risultati.
+Il risultato è `installer\Output\CRIBIS_Export_Setup_<versione>.exe`. L'installazione è **per utente** (senza permessi di amministratore) in `%LOCALAPPDATA%\Programs\CRIBIS Export`, perché l'app scrive configurazione, log e risultati accanto all'eseguibile. Installa anche due file di esempio, `config.json` (senza credenziali) e `dati.txt` (un elenco con una P.IVA), senza mai sovrascrivere quelli già presenti: sono in `installer\esempio\` (il config si chiama `config.template.json` per non finire in `.gitignore`). Crea il collegamento nel menu Start (e sul desktop, a scelta) e la voce di disinstallazione, che rimuove anche `config.json` e il log ma lascia il file Excel dei risultati.
 
 L'eseguibile creato è autonomo. `build/`, `dist/`, `config.json` e i file generati sono esclusi da git. Per pubblicare una nuova versione:
 

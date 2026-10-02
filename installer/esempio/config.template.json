@@ -1,0 +1,14 @@
+{
+  "LOGIN_URL": "https://www2.cribisx.com/Account/LogOn?ReturnUrl=%2f",
+  "USERNAME": "",
+  "PASSWORD": "",
+  "OUTPUT_FILE": "cribis_dati_export.xls",
+  "PROXY": "",
+  "SHOW_BROWSER": true,
+  "MIN_DELAY": 4,
+  "MAX_DELAY": 9,
+  "LONG_BREAK_EVERY": 100,
+  "LONG_BREAK_SECONDS": 180,
+  "DRIVER_RESTART_EVERY": 25,
+  "USER_AGENTS_FILE": "user_agents.txt"
+}
