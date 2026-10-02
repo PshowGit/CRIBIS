@@ -1,0 +1,12 @@
+# Credenziali e file generati a runtime
+config.json
+*.csv
+*.xls
+*.log
+
+__pycache__/
+.venv/
+
+# Output di PyInstaller: l'eseguibile si distribuisce con le GitHub Releases
+build/
+dist/
