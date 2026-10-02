@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="it">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CRIBIS Export</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: hero a due colonne (testo + finestra dell'app), poi manuale a colonna singola
+     con indice laterale su schermi larghi. Un solo accento (verde acqua), tutto il resto neutro. */
+  :root {
+    --bg: #f2f6f7;
+    --surface: #ffffff;
+    --surface-2: #e8eff1;
+    --fg: #14252b;
+    --muted: #4d6169;
+    --line: #d3dee1;
+    --accent: #0c7f79;
+    --accent-fg: #ffffff;
+    --accent-soft: #d9efed;
+    --warn: #8a5a00;
+    --warn-soft: #fbefd2;
+    --ok: #17724b;
+    --err: #a3302b;
+
+    /* La finestra del programma è sempre scura, come nell'app vera */
+    --app-bg: #1d2a30;
+    --app-panel: #30353a;
+    --app-field: #1c2024;
+    --app-line: #454c52;
+    --app-text: #e9eef0;
+    --app-teal: #1fa8a0;
+    --app-log: #7fe3dc;
+
+    --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+    --font-body: "Figtree", "Segoe UI", system-ui, sans-serif;
+    --font-mono: "IBM Plex Mono", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e1a1f; --surface: #15252b; --surface-2: #1c3037; --fg: #e4eef0; --muted: #9bb0b6;
+      --line: #28404a; --accent: #3cc3ba; --accent-fg: #06201e; --accent-soft: #15383a;
+      --warn: #f0c36a; --warn-soft: #3a2f12; --ok: #5fd9a0; --err: #ff8a82;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e1a1f; --surface: #15252b; --surface-2: #1c3037; --fg: #e4eef0; --muted: #9bb0b6;
+    --line: #28404a; --accent: #3cc3ba; --accent-fg: #06201e; --accent-soft: #15383a;
+    --warn: #f0c36a; --warn-soft: #3a2f12; --ok: #5fd9a0; --err: #ff8a82;
+    color-scheme: dark;
+  }
+
+  body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 17px; line-height: 1.6;
+         padding-inline: 16px; }
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  h1, h2, h3 { font-family: var(--font-display); line-height: 1.1; text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+  p { margin: 0; }
+  a { color: var(--accent); }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+  .wrap { max-width: 1120px; margin-inline: auto; }
+
+  /* Barra superiore */
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 18px; }
+  .brand { font-family: var(--font-display); font-weight: 800; font-size: 20px; letter-spacing: -0.01em; }
+  .brand span { color: var(--accent); }
+  .top nav { display: flex; gap: 22px; font-size: 15px; font-weight: 500; }
+  .top nav a { color: var(--muted); text-decoration: none; }
+  .top nav a:hover { color: var(--fg); }
+  @media (max-width: 760px) { .top nav { display: none; } }
+
+  /* Pulsanti */
+  .btn { display: inline-flex; align-items: center; gap: 10px; font: 600 17px var(--font-body); text-decoration: none;
+         padding: 14px 22px; border-radius: 10px; border: 2px solid var(--accent); }
+  .btn.primary { background: var(--accent); color: var(--accent-fg); }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn.ghost { color: var(--fg); border-color: var(--line); background: transparent; }
+  .btn.ghost:hover { border-color: var(--accent); }
+  .btn svg { flex: none; }
+
+  /* Hero */
+  .hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 48px; align-items: center;
+          padding-block: 40px 64px; }
+  .hero h1 { font-size: clamp(40px, 6vw, 68px); font-weight: 800; }
+  .hero .lead { font-size: 20px; color: var(--muted); margin-top: 20px; max-width: 30em; }
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+  .meta { font-size: 14px; color: var(--muted); margin-top: 14px; }
+  @media (max-width: 900px) { .hero { grid-template-columns: minmax(0, 1fr); gap: 36px; } }
+
+  /* Finestra del programma (illustrazione) */
+  .app { background: var(--app-bg); border-radius: 12px; border: 1px solid #0b1417; overflow: hidden;
+         box-shadow: 0 18px 50px rgba(8, 24, 30, 0.28); color: var(--app-text); font-size: 13px; line-height: 1.4; }
+  .app .bar { background: #0f3a40; padding: 8px 12px; font-size: 12px; display: flex; justify-content: space-between; }
+  .app .body { padding: 12px; display: grid; gap: 10px; }
+  .panel { background: var(--app-panel); border: 1px solid var(--app-line); border-radius: 8px; padding: 10px 12px; }
+  .panel h4 { margin: 0 0 8px; font: 800 13px var(--font-display); letter-spacing: 0.02em; text-transform: uppercase; }
+  .field { display: grid; grid-template-columns: 74px 1fr; gap: 8px; align-items: center; margin-bottom: 6px; }
+  .field i { font-style: normal; background: var(--app-field); border: 1px solid var(--app-line); border-radius: 6px; padding: 5px 8px; }
+  .savebtn { background: var(--app-teal); color: #fff; text-align: center; font-weight: 600; border-radius: 6px; padding: 6px; }
+  .drop { border: 2px dashed #9aa1a7; border-radius: 6px; padding: 16px 8px; text-align: center; }
+  .drop b { display: block; font: 800 15px var(--font-display); }
+  .drop span { font-size: 11px; color: #c9d1d6; }
+  .file { margin-top: 8px; }
+  .prog { display: flex; align-items: center; gap: 8px; }
+  .prog .track { flex: 1; height: 12px; border-radius: 6px; background: var(--app-field); overflow: hidden; }
+  .prog .track b { display: block; height: 100%; width: 30%; background: var(--app-teal); }
+  .log { background: #14181b; border: 1px solid var(--app-line); border-radius: 6px; padding: 8px; margin-top: 8px;
+         font: 400 11px/1.5 var(--font-mono); color: var(--app-log); overflow-x: auto; white-space: nowrap; }
+  .status { margin-top: 8px; font-weight: 700; color: #f2c14e; }
+  .btns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
+  .btns span { text-align: center; padding: 7px 2px; border-radius: 6px; border: 2px solid; font: 800 11px var(--font-display); }
+  .btns .go { background: #2c5e50; border-color: #3fcf8e; color: #5ff0a8; }
+  .btns .clr { background: #3a4047; border-color: #9aa1a7; color: #d5dbe0; }
+  .btns .stp { background: #6a2f33; border-color: #e05a5a; color: #ff7a7a; }
+
+  /* Corpo del manuale */
+  .doc { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 56px; padding-block: 24px 72px;
+         border-top: 1px solid var(--line); }
+  .toc { position: sticky; top: 24px; align-self: start; font-size: 15px; }
+  .toc h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 12px; font-family: var(--font-body); font-weight: 600; }
+  .toc a { display: block; padding: 6px 0; color: var(--fg); text-decoration: none; border-left: 2px solid var(--line); padding-left: 12px; }
+  .toc a:hover { border-color: var(--accent); color: var(--accent); }
+  @media (max-width: 900px) { .doc { grid-template-columns: minmax(0, 1fr); gap: 8px; } .toc { display: none; } }
+
+  section { padding-block: 40px 8px; scroll-margin-top: 16px; }
+  section h2 { font-size: clamp(28px, 4vw, 38px); font-weight: 800; margin-bottom: 14px; }
+  section h3 { font-size: 21px; font-weight: 600; margin: 28px 0 8px; }
+  section p + p { margin-top: 12px; }
+  .prose { max-width: 40em; }
+
+  .steps { list-style: none; margin: 24px 0 0; padding: 0; display: grid; gap: 14px; counter-reset: s; max-width: 46em; }
+  .steps li { counter-increment: s; display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 16px; align-items: start;
+              background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .steps li::before { content: counter(s); font: 800 20px var(--font-display); width: 40px; height: 40px; border-radius: 50%;
+                      background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; }
+  .steps strong { display: block; font-family: var(--font-display); font-size: 19px; margin-bottom: 2px; }
+  .steps p { color: var(--muted); font-size: 16px; }
+
+  .note { margin-top: 20px; max-width: 46em; padding: 14px 18px; border-radius: 10px; background: var(--warn-soft);
+          color: var(--fg); border-left: 4px solid var(--warn); font-size: 16px; }
+  .note b { color: var(--warn); }
+  .tip { background: var(--accent-soft); border-left-color: var(--accent); }
+  .tip b { color: var(--accent); }
+
+  code, .path { font-family: var(--font-mono); font-size: 0.88em; background: var(--surface-2); padding: 2px 6px; border-radius: 5px; overflow-wrap: anywhere; }
+  .scroll { overflow-x: auto; margin-top: 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); background: var(--surface-2); white-space: nowrap; }
+  tr:last-child td { border-bottom: 0; }
+  td.k { font-weight: 600; white-space: nowrap; }
+  .sheet th, .sheet td { font-family: var(--font-mono); font-size: 12.5px; white-space: nowrap; }
+  .sheet td.nd { color: var(--muted); }
+  .cap { font-size: 14px; color: var(--muted); margin-top: 8px; }
+
+  .states { display: grid; gap: 10px; margin-top: 18px; max-width: 46em; }
+  .states div { display: grid; grid-template-columns: 12px minmax(0, 1fr); gap: 12px; align-items: baseline; }
+  .states i { width: 12px; height: 12px; border-radius: 50%; display: block; transform: translateY(1px); }
+
+  details { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 0 18px; max-width: 46em; }
+  details + details { margin-top: 10px; }
+  summary { cursor: pointer; padding: 15px 0; font-weight: 600; font-size: 17px; list-style-position: outside; }
+  details[open] summary { color: var(--accent); }
+  details p { padding-bottom: 16px; color: var(--muted); font-size: 16px; }
+  details p b { color: var(--fg); }
+
+  .bottom { display: grid; gap: 18px; justify-items: start; padding: 36px clamp(20px, 4vw, 44px); border-radius: 18px;
+            background: var(--surface); border: 1px solid var(--line); margin-bottom: 40px; }
+  .bottom h2 { font-size: clamp(26px, 4vw, 36px); }
+  footer { color: var(--muted); font-size: 14px; padding-block: 8px 40px; }
+  @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">CRIBIS <span>Export</span></div>
+    <nav aria-label="Sezioni del manuale">
+      <a href="#installazione">Installazione</a>
+      <a href="#uso">Come si usa</a>
+      <a href="#risultato">Il risultato</a>
+      <a href="#problemi">Problemi comuni</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="hero">
+      <div>
+        <h1>Dall'elenco di P.IVA al foglio Excel.</h1>
+        <p class="lead">CRIBIS Export cerca per te ogni azienda del tuo elenco su CRIBIS X e raccoglie sede, codice fiscale, IVA, REA e attività in un file Excel. Trascini il file, premi Avvia, aspetti.</p>
+        <div class="cta">
+          <a class="btn primary" href="https://github.com/PshowGit/CRIBIS/releases/download/v1.0.2/CRIBIS_Export_Setup_1.0.2.exe">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 20h16"/></svg>
+            Scarica per Windows
+          </a>
+          <a class="btn ghost" href="#installazione">Leggi il manuale</a>
+        </div>
+        <p class="meta">Versione 1.0.2 · circa 50 MB · Windows 10 e 11 · non servono permessi di amministratore</p>
+      </div>
+
+      <div class="app" role="img" aria-label="Finestra del programma: credenziali, area per trascinare il file, barra di avanzamento, registro e pulsanti Avvia, Pulisci, Interrompi">
+        <div class="bar"><span>CRIBIS Export Tool</span><span>—&nbsp;&nbsp;☐&nbsp;&nbsp;✕</span></div>
+        <div class="body">
+          <div class="panel">
+            <h4>Impostazioni account</h4>
+            <div class="field">Utente:<i>nome.utente</i></div>
+            <div class="field">Password:<i>••••••••••••</i></div>
+            <div class="savebtn">[ Salva Credenziali ]</div>
+          </div>
+          <div class="panel">
+            <h4>Input dati</h4>
+            <div class="drop"><b>TRASCINA QUI IL TUO FILE</b><span>(.txt, .csv, .xls, .xlsx)</span></div>
+            <div class="file">File selezionato: lista_clienti.xlsx (24 IVA trovate)</div>
+          </div>
+          <div class="panel">
+            <h4>Processo e log</h4>
+            <div class="prog"><div class="track"><b></b></div><span>30%</span></div>
+            <div class="status">⏳ Esportazione in corso...</div>
+            <div class="log">[10:45:01] [8/24] Ricerca per: '0123…'<br>[10:45:09] Dati salvati: ESEMPIO SRL</div>
+            <div class="btns"><span class="go">[ ▶ AVVIA ]</span><span class="clr">[ PULISCI ]</span><span class="stp">[ ■ INTERROMPI ]</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="doc">
+      <aside class="toc" aria-label="Indice">
+        <h2>In questa pagina</h2>
+        <a href="#prima">Prima di iniziare</a>
+        <a href="#installazione">Installazione</a>
+        <a href="#uso">Come si usa</a>
+        <a href="#file">Il file da caricare</a>
+        <a href="#risultato">Il risultato</a>
+        <a href="#pulsanti">Pulsanti e stati</a>
+        <a href="#problemi">Problemi comuni</a>
+      </aside>
+
+      <div>
+        <section id="prima">
+          <h2>Prima di iniziare</h2>
+          <div class="prose">
+            <p>Per usare il programma ti servono quattro cose:</p>
+          </div>
+          <div class="scroll">
+            <table>
+              <tbody>
+                <tr><td class="k">Windows 10 o 11</td><td>Il programma è fatto per Windows e non funziona su Mac.</td></tr>
+                <tr><td class="k">Google Chrome</td><td>Deve essere installato. Il programma lo usa in automatico per navigare su CRIBIS X.</td></tr>
+                <tr><td class="k">Internet</td><td>Serve per collegarsi a CRIBIS X e, la prima volta, per scaricare il componente che guida Chrome.</td></tr>
+                <tr><td class="k">Un account CRIBIS X</td><td>Nome utente e password con cui entri di solito sul portale.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="installazione">
+          <h2>Installazione</h2>
+          <ol class="steps">
+            <li><div><strong>Scarica il programma</strong><p>Premi <b>Scarica per Windows</b> in alto o in fondo a questa pagina. Si scarica un file chiamato <code>CRIBIS_Export_Setup_1.0.2.exe</code>.</p></div></li>
+            <li><div><strong>Aprilo</strong><p>Fai doppio clic sul file scaricato. Se Windows mostra “Windows ha protetto il PC”, premi <b>Ulteriori informazioni</b> e poi <b>Esegui comunque</b>. Succede perché il programma è nuovo e non ha ancora una firma digitale.</p></div></li>
+            <li><div><strong>Segui la procedura guidata</strong><p>Premi <b>Avanti</b> fino alla fine. Puoi lasciare la cartella proposta e, se vuoi, spuntare la creazione dell'icona sul desktop.</p></div></li>
+            <li><div><strong>Avvia CRIBIS Export</strong><p>Alla fine dell'installazione lascia la spunta su “Avvia CRIBIS Export”. Le volte successive lo trovi nel menu Start o sul desktop.</p></div></li>
+          </ol>
+          <p class="note tip"><b>Aggiornare il programma.</b> Quando esce una nuova versione, scarica il nuovo file e avvialo allo stesso modo: sostituisce quello vecchio e le tue credenziali restano salvate.</p>
+        </section>
+
+        <section id="uso">
+          <h2>Come si usa</h2>
+          <ol class="steps">
+            <li><div><strong>Inserisci le credenziali</strong><p>Scrivi utente e password di CRIBIS X e premi <b>Salva Credenziali</b>. Lo fai una volta sola: il programma se le ricorda sul tuo computer.</p></div></li>
+            <li><div><strong>Carica il tuo elenco</strong><p>Trascina il file nell'area tratteggiata, oppure clicca sull'area per sceglierlo dal computer. Sotto compare quante voci ha trovato, ad esempio “24 IVA trovate” oppure “12 Ragioni sociali trovate”.</p></div></li>
+            <li><div><strong>Scegli se vedere il browser</strong><p>L'interruttore <b>Mostra il browser durante l'esecuzione</b> è acceso di default: vedrai Chrome aprirsi e cercare da solo. Spegnilo se preferisci che lavori in secondo piano.</p></div></li>
+            <li><div><strong>Premi Avvia</strong><p>Il programma entra in CRIBIS X e cerca le voci una alla volta. Se il browser è visibile, non chiuderlo e non usarlo mentre lavora.</p></div></li>
+            <li><div><strong>Controlla l'avanzamento</strong><p>La barra mostra la percentuale e il riquadro nero racconta cosa sta succedendo. Quando ha finito, sotto la barra compare una riga verde con l'esito.</p></div></li>
+            <li><div><strong>Apri il risultato</strong><p>Premi <b>Apri file Excel</b> in alto a destra nel riquadro del processo. Si apre il foglio con tutti i dati raccolti.</p></div></li>
+          </ol>
+          <p class="note"><b>Ci vuole pazienza.</b> Tra una ricerca e l'altra il programma aspetta da 4 a 9 secondi, e ogni 100 ricerche fa una pausa di 3 minuti. È voluto: evita di sovraccaricare il portale e di essere bloccati. Per elenchi lunghi puoi lasciarlo lavorare e fare altro, soprattutto con il browser nascosto.</p>
+        </section>
+
+        <section id="file">
+          <h2>Il file da caricare</h2>
+          <div class="prose">
+            <p>Il programma legge quattro tipi di file. In tutti i casi cerca una voce per riga, e ogni voce può essere una partita IVA, un codice fiscale o una ragione sociale.</p>
+          </div>
+          <div class="scroll">
+            <table>
+              <thead><tr><th>Tipo</th><th>Cosa legge</th></tr></thead>
+              <tbody>
+                <tr><td class="k"><code>.txt</code></td><td>Una voce per riga. Le righe vuote sono ignorate.</td></tr>
+                <tr><td class="k"><code>.xlsx</code> e <code>.xls</code></td><td>La prima colonna che contiene dei dati. Le altre colonne vengono ignorate.</td></tr>
+                <tr><td class="k"><code>.csv</code></td><td>La prima colonna che contiene dei dati, con il separatore riconosciuto in automatico.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h3>Un titolo in cima alla colonna</h3>
+          <div class="prose">
+            <p>Nei file Excel e CSV puoi scrivere un titolo nella prima riga, per esempio “Partita IVA”: viene saltato da solo. Succede quando la prima riga non contiene nessuna cifra. Nei file <code>.txt</code> ogni riga è una voce, quindi non scrivere titoli.</p>
+          </div>
+          <p class="note tip"><b>Gli zeri iniziali.</b> Se in Excel le partite IVA perdono lo zero davanti, formatta la colonna come “Testo” prima di salvare il file. Una partita IVA ha sempre 11 cifre.</p>
+        </section>
+
+        <section id="risultato">
+          <h2>Il risultato</h2>
+          <div class="prose">
+            <p>Il programma crea un file Excel chiamato <code>cribis_dati_export.xls</code> con una riga per ogni voce del tuo elenco, nello stesso ordine. La prima colonna ripete la voce che hai cercato, così sai sempre a quale riga corrisponde cosa.</p>
+          </div>
+          <div class="scroll">
+            <table class="sheet" aria-label="Esempio di file Excel di risultato">
+              <thead><tr><th>Termine di Ricerca</th><th>nome_azienda</th><th>sede</th><th>codice_fiscale</th><th>iva</th><th>cciaa_rea</th><th>natura_giuridica</th><th>attività</th><th>attività_dichiarata</th></tr></thead>
+              <tbody>
+                <tr><td>01234567897</td><td>ESEMPIO S.R.L.</td><td>Via Roma 1, Torino</td><td>01234567897</td><td>01234567897</td><td>TO-123456</td><td>Società a responsabilità limitata</td><td>Commercio all'ingrosso</td><td>Vendita di componenti</td></tr>
+                <tr><td>99999999999</td><td class="nd">N/D</td><td class="nd">N/D</td><td class="nd">N/D</td><td class="nd">N/D</td><td class="nd">N/D</td><td class="nd">N/D</td><td class="nd">N/D</td><td class="nd">N/D</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="cap">Dati di esempio. La seconda riga mostra cosa succede quando una voce non produce risultati: tutte le colonne valgono N/D.</p>
+          <h3>Dove si trova il file</h3>
+          <div class="prose">
+            <p>Il modo più semplice è il pulsante <b>Apri file Excel</b>. Il file sta nella cartella del programma: <span class="path">%LOCALAPPDATA%\Programs\CRIBIS Export</span>. Se lo copi altrove, fallo con il programma fermo.</p>
+          </div>
+          <p class="note"><b>Chiudi il file prima di avviare.</b> Se il foglio Excel è aperto, il programma non riesce ad aggiornarlo e si ferma subito con un errore. Puoi aprirlo per dare un'occhiata mentre lavora, ma poi chiudilo prima che continui. A ogni nuova esportazione il file precedente viene sostituito: copialo prima se ti serve.</p>
+        </section>
+
+        <section id="pulsanti">
+          <h2>Pulsanti e stati</h2>
+          <div class="scroll">
+            <table>
+              <thead><tr><th>Pulsante</th><th>A cosa serve</th></tr></thead>
+              <tbody>
+                <tr><td class="k">Salva Credenziali</td><td>Memorizza utente e password sul tuo computer.</td></tr>
+                <tr><td class="k">Avvia</td><td>Inizia l'esportazione dell'elenco caricato.</td></tr>
+                <tr><td class="k">Interrompi</td><td>Ferma tutto e chiude il browser. Le righe già raccolte restano nel file Excel.</td></tr>
+                <tr><td class="k">Pulisci</td><td>Svuota il riquadro dei messaggi, la barra e il file caricato. Le credenziali restano. Non funziona mentre l'esportazione è in corso.</td></tr>
+                <tr><td class="k">Apri file Excel</td><td>Apre il risultato dell'ultima esportazione.</td></tr>
+                <tr><td class="k">Apri file di log</td><td>Apre il registro completo di tutte le sessioni. Utile se devi segnalare un problema.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h3>La riga di stato</h3>
+          <div class="states">
+            <div><i style="background:var(--muted)"></i><span><b>In attesa</b>. Il programma è pronto.</span></div>
+            <div><i style="background:#d9a21b"></i><span><b>Esportazione in corso</b>. Sta cercando le voci dell'elenco.</span></div>
+            <div><i style="background:var(--ok)"></i><span><b>Esportazione completata</b>, con il numero di ricerche e di risultati trovati.</span></div>
+            <div><i style="background:#e0801f"></i><span><b>Esportazione interrotta</b>. L'hai fermata tu: i dati raccolti fino a quel momento sono nel file.</span></div>
+            <div><i style="background:var(--err)"></i><span><b>Esportazione non riuscita</b>, con il motivo, ad esempio login fallito.</span></div>
+          </div>
+        </section>
+
+        <section id="problemi">
+          <h2>Problemi comuni</h2>
+          <details>
+            <summary>Windows dice che l'app non è riconosciuta</summary>
+            <p>Premi <b>Ulteriori informazioni</b> e poi <b>Esegui comunque</b>. Il programma non ha una firma digitale, quindi Windows lo segnala la prima volta.</p>
+          </details>
+          <details>
+            <summary>Compare “Login fallito”</summary>
+            <p>Controlla utente e password, correggili e premi di nuovo <b>Salva Credenziali</b>. Verifica anche di riuscire ad accedere a CRIBIS X dal browser. Se la password è stata cambiata di recente, usa quella nuova.</p>
+          </details>
+          <details>
+            <summary>Compare un errore sul file Excel</summary>
+            <p>Il file <code>cribis_dati_export.xls</code> è probabilmente aperto in Excel. Chiudilo e premi di nuovo <b>Avvia</b>.</p>
+          </details>
+          <details>
+            <summary>Alcune righe del risultato sono tutte N/D</summary>
+            <p>Per quella voce il portale non ha restituito nessuna azienda. Controlla come è scritta (cifre complete, nessuno spazio di troppo) e riprova da sola. Se N/D compare su moltissime righe, apri il file di log e segnala il problema.</p>
+          </details>
+          <details>
+            <summary>Ho aggiornato Chrome. Devo fare qualcosa?</summary>
+            <p>No. A ogni avvio il programma si procura da solo il componente adatto alla versione di Chrome che hai. Serve solo la connessione a Internet.</p>
+          </details>
+          <details>
+            <summary>Ho chiuso Chrome o il programma durante l'esportazione</summary>
+            <p>Le righe già raccolte restano nel file Excel. Riapri il programma, ricarica l'elenco e ricomincia. Per non rifare tutto, togli dall'elenco le voci già elaborate.</p>
+          </details>
+          <details>
+            <summary>Come disinstallo il programma?</summary>
+            <p>Da <b>Impostazioni → App → App installate</b>, scegli CRIBIS Export e premi <b>Disinstalla</b>. Vengono cancellate le credenziali salvate e il registro. Il file Excel dei risultati resta nella cartella.</p>
+          </details>
+          <details>
+            <summary>Devo segnalare un problema, cosa invio?</summary>
+            <p>Premi <b>Apri file di log</b>, salva il file <code>cribis_export.log</code> e invialo a Calogero Catanzaro. Non contiene la tua password.</p>
+          </details>
+        </section>
+      </div>
+    </div>
+
+    <div class="bottom">
+      <h2>Pronto a provare?</h2>
+      <p style="color:var(--muted);max-width:34em">Scarica l'installer, avvialo e carica il tuo primo elenco. Bastano pochi minuti.</p>
+      <a class="btn primary" href="https://github.com/PshowGit/CRIBIS/releases/download/v1.0.2/CRIBIS_Export_Setup_1.0.2.exe">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 20h16"/></svg>
+        Scarica CRIBIS Export 1.0.2
+      </a>
+      <p class="cap">Dubbi o problemi? Scrivi a Calogero Catanzaro.</p>
+    </div>
+  </main>
+
+  <footer>CRIBIS Export · versione 1.0.2 · per Windows 10 e 11 · Assistenza: Calogero Catanzaro</footer>
+</div>
